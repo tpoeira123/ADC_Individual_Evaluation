@@ -8,7 +8,7 @@
         <param-name>org.eclipse.jetty.containerInitializers</param-name>
             
         <param-value><![CDATA[
-    "ContainerInitializer{org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer,interested=[org.glassfish.jersey.jackson.internal.FilteringJacksonJaxbJsonProvider, org.glassfish.jersey.server.wadl.internal.WadlResource, org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider, org.glassfish.jersey.server.ResourceConfig, org.glassfish.jersey.jackson.internal.DefaultJacksonJaxbJsonProvider, org.glassfish.jersey.server.ResourceConfig$WrappingResourceConfig, org.glassfish.jersey.server.ResourceConfig$RuntimeConfig, org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider, pt.unl.fct.di.adc.firstwebapp.resources.CreateAccountResource],applicable=[],annotated=[]}"]]></param-value>
+    "ContainerInitializer{org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer,interested=[org.glassfish.jersey.jackson.internal.FilteringJacksonJaxbJsonProvider, org.glassfish.jersey.server.wadl.internal.WadlResource, org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider, org.glassfish.jersey.server.ResourceConfig, org.glassfish.jersey.jackson.internal.DefaultJacksonJaxbJsonProvider, org.glassfish.jersey.server.ResourceConfig$WrappingResourceConfig, pt.unl.fct.di.adc.webapp.resources.CreateAccountResource, pt.unl.fct.di.adc.webapp.resources.LoginResource, org.glassfish.jersey.server.ResourceConfig$RuntimeConfig, org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider],applicable=[],annotated=[]}"]]></param-value>
           
     </context-param>
       
@@ -62,7 +62,7 @@
                   
             <param-name>jersey.config.server.provider.packages</param-name>
                   
-            <param-value>pt.unl.fct.di.adc.firstwebapp.resources</param-value>
+            <param-value>pt.unl.fct.di.adc.webapp.resources</param-value>
                 
         </init-param>
             
@@ -424,9 +424,9 @@
                 
         </cookie-config>
             
-        <tracking-mode>COOKIE</tracking-mode>
-            
         <tracking-mode>URL</tracking-mode>
+            
+        <tracking-mode>COOKIE</tracking-mode>
           
     </session-config>
       

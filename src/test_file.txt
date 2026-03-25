@@ -1,0 +1,37 @@
+{
+    "input": {
+        "username": "tp",
+        "password": "123",
+        "confirmation": "123",
+        "email": "tp@gmail.com",
+        "phone": "123456789",
+        "address": "Caparica",
+        "role": "ADMIN"
+    }
+}
+
+
+
+
+
+
+src/main/java/pt.unl.fct.di.adc.firstwebapp/
+├── resources/
+│   ├── CreateAccountResource.java   (/createaccount)
+│   ├── LoginResource.java           (/login)
+│   ├── LogoutResource.java          (/logout)
+│   ├── UserResource.java            (/showusers, /deleteaccount,
+│   │                                 /modaccount, /showuserrole,
+│   │                                 /changeuserrole, /changeuserpwd)
+│   └── SessionResource.java         (/showauthsessions)
+├── util/
+│   ├── UserData.java
+│   ├── AuthToken.java               (updated)
+│   ├── LoginData.java
+│   ├── RegisterData.java
+│   ├── ErrorCodes.java              (NEW)
+│   ├── PasswordUtils.java           (NEW)
+│   └── TokenValidator.java          (NEW)
+└── datastore/
+    ├── UserStore.java               (NEW)
+    └── SessionStore.java            (NEW)
