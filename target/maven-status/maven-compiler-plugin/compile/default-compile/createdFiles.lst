@@ -1,14 +1,15 @@
+pt\unl\fct\di\adc\webapp\input\InputRequest.class
 pt\unl\fct\di\adc\webapp\util\TokenValidator.class
 pt\unl\fct\di\adc\webapp\resources\LoginResource.class
 pt\unl\fct\di\adc\webapp\resources\CreateAccountResource.class
 pt\unl\fct\di\adc\webapp\util\UserData.class
+pt\unl\fct\di\adc\webapp\input\InputRequestToken.class
 pt\unl\fct\di\adc\webapp\resources\SessionResource.class
 pt\unl\fct\di\adc\webapp\resources\LogoutResource.class
 pt\unl\fct\di\adc\webapp\util\LoginData.class
 pt\unl\fct\di\adc\webapp\util\Role.class
 pt\unl\fct\di\adc\webapp\util\ErrorCodes.class
 pt\unl\fct\di\adc\webapp\util\AuthToken.class
-pt\unl\fct\di\adc\webapp\util\InputRequest.class
 pt\unl\fct\di\adc\webapp\util\CreateAccountData.class
 response\ApiResponse.class
 pt\unl\fct\di\adc\webapp\resources\UserResource.class

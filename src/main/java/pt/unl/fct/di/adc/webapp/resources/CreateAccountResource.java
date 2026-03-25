@@ -12,10 +12,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import response.ApiResponse;
 import pt.unl.fct.di.adc.webapp.util.ErrorCodes;
-import pt.unl.fct.di.adc.webapp.util.InputRequest;
+import pt.unl.fct.di.adc.webapp.input.InputRequest;
 import pt.unl.fct.di.adc.webapp.util.CreateAccountData;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -52,7 +51,7 @@ public class CreateAccountResource {
 
             response = new ApiResponse(codeError, description);
 
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).type(MediaType.APPLICATION_JSON).build();
+            return Response.ok(g.toJson(response)).build();
         }
 
         Key key = datastore.newKeyFactory().setKind("User").newKey(data.getUsername());
@@ -77,7 +76,7 @@ public class CreateAccountResource {
 
             response = new ApiResponse(codeError, description);
 
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).type(MediaType.APPLICATION_JSON).build();
+            return Response.ok(g.toJson(response)).build();
         }
 
         Map<String, Object> success = new LinkedHashMap<>();
@@ -86,6 +85,6 @@ public class CreateAccountResource {
 
         response = new ApiResponse("success", success);
 
-        return Response.ok().entity(response).type(MediaType.APPLICATION_JSON).build();
+        return Response.ok(g.toJson(response)).build();
     }
 }

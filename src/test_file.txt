@@ -11,7 +11,15 @@
 }
 
 
-
+"status": "success",
+    "data": {
+        "tokenId": "6808a6f0-0748-42fe-acf8-9e468ef1801c",
+        "userId": "tp",
+        "role": "ADMIN",
+        "issuedAt": 1774457994384,
+        "expiresAt": 1774465194384
+    }
+}
 
 
 

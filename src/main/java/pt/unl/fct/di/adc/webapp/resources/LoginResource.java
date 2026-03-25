@@ -12,10 +12,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.digest.DigestUtils;
+import pt.unl.fct.di.adc.webapp.input.InputRequest;
 import pt.unl.fct.di.adc.webapp.util.*;
 import response.ApiResponse;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -51,7 +51,7 @@ public class LoginResource {
 
             response = new ApiResponse(codeError, description);
 
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).type(MediaType.APPLICATION_JSON).build();
+            return Response.ok(g.toJson(response)).build();
         }
 
         Key key = datastore.newKeyFactory().setKind("User").newKey(data.getUsername());
@@ -64,7 +64,7 @@ public class LoginResource {
 
             response = new ApiResponse(codeError, description);
 
-            return Response.status(Response.Status.NOT_FOUND).entity(response).type(MediaType.APPLICATION_JSON).build();
+            return Response.ok(g.toJson(response)).build();
         }
         else{
 
@@ -74,7 +74,7 @@ public class LoginResource {
 
                 response = new ApiResponse(codeError, description);
 
-                return Response.status(Response.Status.FORBIDDEN).entity(response).type(MediaType.APPLICATION_JSON).build();
+                return Response.ok(g.toJson(response)).build();
             }
             else {
                 AuthToken token = new AuthToken(data.getUsername(), user.getString("user_role"));
@@ -93,12 +93,12 @@ public class LoginResource {
                 success.put("tokenId", token.getTokenId());
                 success.put("userId", token.getUserId());
                 success.put("role", token.getRole());
-                success.put("issuedAt", String.valueOf(token.getIssuedAt()));
-                success.put("expiresAt", String.valueOf(token.getExpiresAt()));
+                success.put("issuedAt", token.getIssuedAt());
+                success.put("expiresAt", token.getExpiresAt());
 
                 response = new ApiResponse("success", success);
 
-                return Response.ok().entity(response).type(MediaType.APPLICATION_JSON).build();
+                return Response.ok(g.toJson(response)).build();
 
             }
 
