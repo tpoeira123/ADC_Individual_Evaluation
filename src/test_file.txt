@@ -3,7 +3,6 @@
         "username": "tp",
         "password": "123",
         "confirmation": "123",
-        "email": "tp@gmail.com",
         "phone": "123456789",
         "address": "Caparica",
         "role": "ADMIN"
@@ -20,6 +19,38 @@
         "expiresAt": 1774465194384
     }
 }
+
+
+
+{
+        "input": {
+        "username": "tpoeira",
+        "password": "123",
+        "confirmation": "123",
+        "phone": "123456789",
+        "address": "Caparica",
+        "role": "USER"
+    }
+}
+
+
+
+{
+    "status": "success",
+    "data": {
+        "tokenId": "ee5380c4-ec4b-4bd6-960b-3f69d8f4b050",
+        "userId": "tpoeira",
+        "role": "USER",
+        "issuedAt": 1774480278164,
+        "expiresAt": 1774481178164
+    }
+}
+
+
+
+
+
+
 
 
 

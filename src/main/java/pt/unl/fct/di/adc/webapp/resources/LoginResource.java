@@ -14,7 +14,7 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.digest.DigestUtils;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
 import pt.unl.fct.di.adc.webapp.util.*;
-import response.ApiResponse;
+import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class LoginResource {
 
                 Key tokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(token.getTokenId());
 
-                Entity tokenEntity = Entity.newBuilder(tokenKey).set("user_id", token.getUserId())
+                Entity tokenEntity = Entity.newBuilder(tokenKey).set("username", token.getUsername())
                         .set("user_role", token.getRole())
                         .set("issuedAt", token.getIssuedAt())
                         .set("expiresAt", token.getExpiresAt()).build();
@@ -91,7 +91,7 @@ public class LoginResource {
                 // allows to do the JSON nest without creating a new class
                 Map<String, Object> success = new LinkedHashMap<>();
                 success.put("tokenId", token.getTokenId());
-                success.put("userId", token.getUserId());
+                success.put("username", token.getUsername());
                 success.put("role", token.getRole());
                 success.put("issuedAt", token.getIssuedAt());
                 success.put("expiresAt", token.getExpiresAt());

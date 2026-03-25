@@ -10,7 +10,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import response.ApiResponse;
+import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 import pt.unl.fct.di.adc.webapp.util.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
 import pt.unl.fct.di.adc.webapp.util.CreateAccountData;
@@ -61,7 +61,6 @@ public class CreateAccountResource {
         if (user == null){
             user = Entity.newBuilder(key).set("user_name", data.getUsername())
                     .set("user_pwd", DigestUtils.sha512Hex(data.getPassword()))
-                    .set("user_email", data.getEmail())
                     .set("user_phone", data.getPhone())
                     .set("user_address", data.getAddress())
                     .set("user_role", data.getRole())
