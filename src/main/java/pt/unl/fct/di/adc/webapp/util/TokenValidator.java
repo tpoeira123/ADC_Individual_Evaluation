@@ -6,6 +6,9 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class TokenValidator {
 
     private ApiResponse errorResponse;
@@ -14,7 +17,7 @@ public class TokenValidator {
 
     public TokenValidator() {}
 
-    public Entity validateToken(AuthToken inputToken) {
+    public Entity validateToken(AuthToken inputToken, Role... allowedRoles) {
 
         if (inputToken.getTokenId() == null || inputToken.getTokenId().isBlank()) {
             String codeError = String.valueOf(ErrorCodes.INVALID_TOKEN.getErrorCode());
@@ -39,7 +42,7 @@ public class TokenValidator {
         }
 
         long expiresAt = token.getLong("expiresAt");
-        if(expiresAt < System.currentTimeMillis()){
+        if(expiresAt < System.currentTimeMillis() / 1000){
             String codeError = String.valueOf(ErrorCodes.TOKEN_EXPIRED.getErrorCode());
             String description = ErrorCodes.TOKEN_EXPIRED.getDescription();
 
@@ -49,14 +52,17 @@ public class TokenValidator {
         }
 
         String role = token.getString("user_role");
-        if (!role.equals(Role.ADMIN.toString()) && !role.equals(Role.BOFFICER.toString())) {
+
+        boolean authorized = Arrays.stream(allowedRoles).anyMatch(r -> r.name().equals(role));
+
+        if(!authorized){
             String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
             String description = ErrorCodes.UNAUTHORIZED.getDescription();
 
             errorResponse = new ApiResponse(codeError, description);
-
             return null;
         }
+
         return token;
     }
 

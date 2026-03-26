@@ -4,6 +4,7 @@ C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\resources\LogoutResource.java
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\resources\SessionResource.java
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\resources\UserResource.java
+C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\response\ApiResponse.java
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\util\AuthToken.java
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\util\CreateAccountData.java
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\util\ErrorCodes.java
@@ -11,4 +12,3 @@ C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\util\Role.java
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\util\TokenValidator.java
 C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\pt\unl\fct\di\adc\webapp\util\UserData.java
-C:\Users\tpoei\IdeaProjects\3 Ano\2 Semestre\ADC\ADC_individual_project\src\main\java\response\ApiResponse.java

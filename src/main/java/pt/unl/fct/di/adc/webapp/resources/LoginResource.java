@@ -81,7 +81,7 @@ public class LoginResource {
 
                 Key tokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(token.getTokenId());
 
-                Entity tokenEntity = Entity.newBuilder(tokenKey).set("username", token.getUsername())
+                Entity tokenEntity = Entity.newBuilder(tokenKey).set("user_name", token.getUsername())
                         .set("user_role", token.getRole())
                         .set("issuedAt", token.getIssuedAt())
                         .set("expiresAt", token.getExpiresAt()).build();
