@@ -10,14 +10,14 @@
         "role": "ADMIN"
     }
 }
-
 {
-        "tokenId": "e61953a8-db98-4181-a559-e3d39704b08c",
+        "tokenId": "3702e6c2-e199-4379-93fe-ce0d6b32a8a2",
         "username": "tp@",
         "role": "ADMIN",
-        "issuedAt": 1774545816,
-        "expiresAt": 1781745816
+        "issuedAt": 1774549100,
+        "expiresAt": 1781749100
     }
+
 
 
 {
@@ -32,12 +32,13 @@
 }
 
 {
-        "tokenId": "0212b74f-664d-413f-b051-2fb13feb2a9d",
+        "tokenId": "85e2f0b4-ca09-416b-9ce8-d369bbc9b1a7",
         "username": "t@",
         "role": "ADMIN",
-        "issuedAt": 1774545716,
-        "expiresAt": 1781745716
+        "issuedAt": 1774549120,
+        "expiresAt": 1781749120
     }
+
 
 
 ---------------------------------------- USER ---------------------------------------------
@@ -54,12 +55,12 @@
 }
 
 {
-        "tokenId": "4fd2ef94-7b54-4524-a86c-c6c72a921c69",
+        "tokenId": "2b1da5a9-fc92-4623-afb7-8b86e17e1d53",
         "username": "tpoeira@",
         "role": "USER",
-        "issuedAt": 1774547472,
-        "expiresAt": 1781747472
-}
+        "issuedAt": 1774550013,
+        "expiresAt": 1781750013
+    }
 
 {
         "input": {
@@ -72,14 +73,15 @@
     }
 }
 
-
 {
-        "tokenId": "a5990399-d46b-4033-bb41-75aad8a5c3ee",
+        "tokenId": "e8bbabef-b3dc-4399-8bd7-f58350647b89",
         "username": "f@",
         "role": "USER",
-        "issuedAt": 1774546821,
-        "expiresAt": 1781746821
+        "issuedAt": 1774549219,
+        "expiresAt": 1781749219
     }
+
+
 
 
 
@@ -96,14 +98,12 @@
         "role": "BOFFICER"
     }
 }
-
-
 {
-        "tokenId": "e83b6066-0140-4fa9-aab6-e830613ee803",
+        "tokenId": "eb659207-8aee-4896-8cd6-6f5cc07265c0",
         "username": "a@",
         "role": "BOFFICER",
-        "issuedAt": 1774546693,
-        "expiresAt": 1781746693
+        "issuedAt": 1774549236,
+        "expiresAt": 1781749236
     }
 
 
@@ -120,11 +120,11 @@
 }
 
 {
-        "tokenId": "105014c5-dbca-41a0-9bdc-81a3804bc7c4",
+        "tokenId": "7a0f6bdf-2ee8-444e-b2d6-87e58fe197ea",
         "username": "p@",
         "role": "BOFFICER",
-        "issuedAt": 1774545781,
-        "expiresAt": 1781745781
+        "issuedAt": 1774549256,
+        "expiresAt": 1781749256
     }
 
 
@@ -132,23 +132,6 @@
 
 
 
-
-{
-    "input": {
-        "username": "p@",
-        "attributes":{
-            "phone": "234567890",
-            "address": "Lagoa"
-        }
-    },
-    "token":{
-        "tokenId": "dac03d3c-6ea4-4839-aa71-08c54c92b36b",
-        "username": "tpoeira@",
-        "role": "USER",
-        "issuedAt": 1774545742,
-        "expiresAt": 1781745742
-    }
-}
 
 
 
