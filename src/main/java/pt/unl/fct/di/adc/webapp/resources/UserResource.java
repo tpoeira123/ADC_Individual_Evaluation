@@ -128,7 +128,7 @@ public class UserResource {
             }
 
             Map<String, Object> success = new LinkedHashMap<>();
-            success.put("data", "message: Account deleted successfully");
+            success.put("message", "Account deleted successfully");
 
             response = new ApiResponse("success", success);
 
@@ -226,7 +226,7 @@ public class UserResource {
             datastore.put(updatedUser.build());
 
             Map<String, Object> success = new LinkedHashMap<>();
-            success.put("data", "message: Updated successfully");
+            success.put("message", "Updated successfully");
             response = new ApiResponse("success", success);
 
             return Response.ok(g.toJson(response)).build();
@@ -236,6 +236,53 @@ public class UserResource {
             response = new ApiResponse(codeError, description);
             return Response.ok(g.toJson(response)).build();
         }
+    }
 
+    @POST
+    @Path("/showuserrole")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response showUserRoles(InputRequest<UserData> input) {
+        UserData inputUser = input.getInput();
+        AuthToken inputToken = input.getToken();
+        ApiResponse response;
+
+        TokenValidator validate = new TokenValidator();
+        Entity token = validate.validateToken(inputToken, Role.ADMIN, Role.BOFFICER);
+        if ( token == null) {
+            return Response.ok(g.toJson(validate.getErrorResponse())).build();
+        }
+
+        Key keyTargetUser =  datastore.newKeyFactory().setKind("User").newKey(inputUser.getUsername());
+        Entity targetUser =  datastore.get(keyTargetUser);
+
+        if (targetUser == null) {
+            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
+            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
+
+            response = new ApiResponse(codeError, description);
+
+            return Response.ok(g.toJson(response)).build();
+        }
+
+        try{
+            String targetedUsername = targetUser.getString("user_name");
+            String targetedRole = targetUser.getString("user_role");
+
+            Map<String, Object> success = new LinkedHashMap<>();
+            success.put("username", targetedUsername);
+            success.put("role", targetedRole);
+
+            response = new ApiResponse("success", success);
+
+            return Response.ok(g.toJson(response)).build();
+        }catch (Exception e){
+            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
+            String description = ErrorCodes.FORBIDDEN.getDescription();
+
+            response = new ApiResponse(codeError, description);
+
+            return Response.ok(g.toJson(response)).build();
+        }
     }
 }
