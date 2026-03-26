@@ -7,8 +7,9 @@ pt\unl\fct\di\adc\webapp\util\UserData.class
 pt\unl\fct\di\adc\webapp\resources\SessionResource.class
 pt\unl\fct\di\adc\webapp\resources\LogoutResource.class
 pt\unl\fct\di\adc\webapp\util\LoginData.class
-pt\unl\fct\di\adc\webapp\util\Role.class
-pt\unl\fct\di\adc\webapp\util\ErrorCodes.class
+pt\unl\fct\di\adc\webapp\enums\ErrorCodes.class
 pt\unl\fct\di\adc\webapp\util\AuthToken.class
 pt\unl\fct\di\adc\webapp\util\CreateAccountData.class
+pt\unl\fct\di\adc\webapp\enums\Role.class
 pt\unl\fct\di\adc\webapp\resources\UserResource.class
+pt\unl\fct\di\adc\webapp\util\AttributesData.class

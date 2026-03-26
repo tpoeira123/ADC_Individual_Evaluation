@@ -1,3 +1,5 @@
+-------------------------- ADMIN -----------------------------------
+
 {
     "input": {
         "username": "tp@",
@@ -9,20 +11,13 @@
     }
 }
 
-
-
 {
-        "input": {
-        "username": "tpoeira@",
-        "password": "123",
-        "confirmation": "123",
-        "phone": "123456789",
-        "address": "Caparica",
-        "role": "USER"
+        "tokenId": "e61953a8-db98-4181-a559-e3d39704b08c",
+        "username": "tp@",
+        "role": "ADMIN",
+        "issuedAt": 1774545816,
+        "expiresAt": 1781745816
     }
-}
-
-
 
 
 {
@@ -36,6 +31,80 @@
     }
 }
 
+{
+        "tokenId": "0212b74f-664d-413f-b051-2fb13feb2a9d",
+        "username": "t@",
+        "role": "ADMIN",
+        "issuedAt": 1774545716,
+        "expiresAt": 1781745716
+    }
+
+
+---------------------------------------- USER ---------------------------------------------
+
+{
+        "input": {
+        "username": "tpoeira@",
+        "password": "123",
+        "confirmation": "123",
+        "phone": "123456789",
+        "address": "Caparica",
+        "role": "USER"
+    }
+}
+
+{
+        "tokenId": "4fd2ef94-7b54-4524-a86c-c6c72a921c69",
+        "username": "tpoeira@",
+        "role": "USER",
+        "issuedAt": 1774547472,
+        "expiresAt": 1781747472
+}
+
+{
+        "input": {
+        "username": "f@",
+        "password": "123",
+        "confirmation": "123",
+        "phone": "123456789",
+        "address": "Caparica",
+        "role": "USER"
+    }
+}
+
+
+{
+        "tokenId": "a5990399-d46b-4033-bb41-75aad8a5c3ee",
+        "username": "f@",
+        "role": "USER",
+        "issuedAt": 1774546821,
+        "expiresAt": 1781746821
+    }
+
+
+
+
+--------------------------------- BOFFICER ---------------------------------
+
+{
+        "input": {
+        "username": "a@",
+        "password": "123",
+        "confirmation": "123",
+        "phone": "123456789",
+        "address": "Caparica",
+        "role": "BOFFICER"
+    }
+}
+
+
+{
+        "tokenId": "e83b6066-0140-4fa9-aab6-e830613ee803",
+        "username": "a@",
+        "role": "BOFFICER",
+        "issuedAt": 1774546693,
+        "expiresAt": 1781746693
+    }
 
 
 
@@ -50,8 +119,36 @@
     }
 }
 
+{
+        "tokenId": "105014c5-dbca-41a0-9bdc-81a3804bc7c4",
+        "username": "p@",
+        "role": "BOFFICER",
+        "issuedAt": 1774545781,
+        "expiresAt": 1781745781
+    }
 
 
+
+
+
+
+
+{
+    "input": {
+        "username": "p@",
+        "attributes":{
+            "phone": "234567890",
+            "address": "Lagoa"
+        }
+    },
+    "token":{
+        "tokenId": "dac03d3c-6ea4-4839-aa71-08c54c92b36b",
+        "username": "tpoeira@",
+        "role": "USER",
+        "issuedAt": 1774545742,
+        "expiresAt": 1781745742
+    }
+}
 
 
 
