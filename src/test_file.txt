@@ -1,6 +1,6 @@
 {
     "input": {
-        "username": "tp",
+        "username": "tp@",
         "password": "123",
         "confirmation": "123",
         "phone": "123456789",
@@ -10,21 +10,10 @@
 }
 
 
-"status": "success",
-    "data": {
-        "tokenId": "6808a6f0-0748-42fe-acf8-9e468ef1801c",
-        "userId": "tp",
-        "role": "ADMIN",
-        "issuedAt": 1774457994384,
-        "expiresAt": 1774465194384
-    }
-}
-
-
 
 {
         "input": {
-        "username": "tpoeira",
+        "username": "tpoeira@",
         "password": "123",
         "confirmation": "123",
         "phone": "123456789",
@@ -35,16 +24,33 @@
 
 
 
+
 {
-    "status": "success",
-    "data": {
-        "tokenId": "ee5380c4-ec4b-4bd6-960b-3f69d8f4b050",
-        "userId": "tpoeira",
-        "role": "USER",
-        "issuedAt": 1774480278164,
-        "expiresAt": 1774481178164
+        "input": {
+        "username": "t@",
+        "password": "123",
+        "confirmation": "123",
+        "phone": "123456789",
+        "address": "Caparica",
+        "role": "ADMIN"
     }
 }
+
+
+
+
+{
+        "input": {
+        "username": "p@",
+        "password": "123",
+        "confirmation": "123",
+        "phone": "123456789",
+        "address": "Caparica",
+        "role": "BOFFICER"
+    }
+}
+
+
 
 
 

@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.webapp.util;
 
+import pt.unl.fct.di.adc.webapp.enums.Role;
+
 public class CreateAccountData {
 
     private String username;

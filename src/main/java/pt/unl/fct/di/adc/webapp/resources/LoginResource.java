@@ -12,6 +12,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.digest.DigestUtils;
+import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
 import pt.unl.fct.di.adc.webapp.util.*;
 import pt.unl.fct.di.adc.webapp.response.ApiResponse;
@@ -81,7 +82,7 @@ public class LoginResource {
 
                 Key tokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(token.getTokenId());
 
-                Entity tokenEntity = Entity.newBuilder(tokenKey).set("username", token.getUsername())
+                Entity tokenEntity = Entity.newBuilder(tokenKey).set("user_name", token.getUsername())
                         .set("user_role", token.getRole())
                         .set("issuedAt", token.getIssuedAt())
                         .set("expiresAt", token.getExpiresAt()).build();
