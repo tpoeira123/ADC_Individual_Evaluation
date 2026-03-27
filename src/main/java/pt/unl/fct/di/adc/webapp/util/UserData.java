@@ -2,6 +2,8 @@ package pt.unl.fct.di.adc.webapp.util;
 
 public class UserData {
     private String username;
+    private String oldPassword;
+    private String newPassword;
     private String newRole;
     private AttributesData attributes;
 
@@ -19,6 +21,12 @@ public class UserData {
     public UserData(String username, String newRole){
         this.username = username;
         this.newRole = newRole;
+    }
+
+    public UserData(String username, String oldPassword, String newPassword){
+        this.username = username;
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
     }
 
     public String getUsername() {
@@ -40,5 +48,19 @@ public class UserData {
     }
     public void setNewRole(String newRole) {
         this.newRole = newRole;
+    }
+
+    public String getOldPassword() {
+        return oldPassword;
+    }
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 }

@@ -8,6 +8,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.codec.digest.DigestUtils;
 import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.enums.Role;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
@@ -205,14 +206,6 @@ public class UserResource {
             }
         }
 
-        if (!targetedUsername.equals(modifyingUsername) && targetedRole.equals(Role.ADMIN.toString())) {
-            String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
-            String description = ErrorCodes.UNAUTHORIZED.getDescription();
-
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
         try{
             Entity.Builder updatedUser = Entity.newBuilder(targetUser);
             if (attributes.getAddress() != null && !attributes.getAddress().isBlank()) {
@@ -287,7 +280,7 @@ public class UserResource {
 
 
     @POST
-    @Path("changeuserrole")
+    @Path("/changeuserrole")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response changeUserRoles(InputRequest<UserData> input) {
@@ -342,7 +335,83 @@ public class UserResource {
             }
 
             Map<String, Object> success = new LinkedHashMap<>();
-            success.put("message", "Updated successfully");
+            success.put("message", "\"Role updated successfully");
+            response = new ApiResponse("success", success);
+            return Response.ok(g.toJson(response)).build();
+
+        }catch (Exception e){
+            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
+            String description = ErrorCodes.FORBIDDEN.getDescription();
+            response = new ApiResponse(codeError, description);
+            return Response.ok(g.toJson(response)).build();
+        }
+    }
+
+
+
+    @POST
+    @Path("/changeuserpwd")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public  Response changeUserPassword(InputRequest<UserData> input) {
+        UserData inputUser = input.getInput();
+        String username = inputUser.getUsername();
+
+        String oldPassword = inputUser.getOldPassword();
+        String newPassword = inputUser.getNewPassword();
+
+        AuthToken inputToken = input.getToken();
+
+        ApiResponse response;
+
+        if (newPassword == null || newPassword.isBlank()){
+            String codeError = String.valueOf(ErrorCodes.INVALID_INPUT.getErrorCode());
+            String description = ErrorCodes.INVALID_INPUT.getDescription();
+            response = new ApiResponse(codeError, description);
+            return Response.ok(g.toJson(response)).build();
+        }
+
+        TokenValidator validate = new TokenValidator();
+        Entity token = validate.validateToken(inputToken, Role.ADMIN, Role.BOFFICER,  Role.USER);
+        if ( token == null) {
+            return Response.ok(g.toJson(validate.getErrorResponse())).build();
+        }
+
+        String userNameToken = token.getString("user_name");
+        if (!userNameToken.equals(username)) {
+            String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
+            String description = ErrorCodes.UNAUTHORIZED.getDescription();
+
+            response = new ApiResponse(codeError, description);
+
+            return Response.ok(g.toJson(response)).build();
+        }
+
+        Key keyUser =  datastore.newKeyFactory().setKind("User").newKey(username);
+        Entity user =  datastore.get(keyUser);
+
+        if (user == null) {
+            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
+            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
+            response = new ApiResponse(codeError, description);
+            return Response.ok(g.toJson(response)).build();
+        }
+        else if(!user.getString("user_pwd").equals(DigestUtils.sha512Hex(oldPassword))) {
+            String codeError = String.valueOf(ErrorCodes.INVALID_CREDENTIALS.getErrorCode());
+            String description = ErrorCodes.INVALID_CREDENTIALS.getDescription();
+            response = new ApiResponse(codeError, description);
+            return Response.ok(g.toJson(response)).build();
+        }
+        try{
+            Entity.Builder updatedUser = Entity.newBuilder(user);
+
+            updatedUser.set("user_pwd", DigestUtils.sha512Hex(newPassword));
+
+            datastore.put(updatedUser.build());
+
+
+            Map<String, Object> success = new LinkedHashMap<>();
+            success.put("message", "Password changed successfully");
             response = new ApiResponse("success", success);
             return Response.ok(g.toJson(response)).build();
 
