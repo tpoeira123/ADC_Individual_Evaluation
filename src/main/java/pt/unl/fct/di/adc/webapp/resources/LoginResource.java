@@ -80,7 +80,7 @@ public class LoginResource {
             else {
                 AuthToken token = new AuthToken(data.getUsername(), user.getString("user_role"));
 
-                Key tokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(token.getTokenId());
+                Key tokenKey = datastore.newKeyFactory().setKind("Sessions").newKey(token.getTokenId());
 
                 Entity tokenEntity = Entity.newBuilder(tokenKey).set("token_id", token.getTokenId())
                         .set("user_name", token.getUsername())

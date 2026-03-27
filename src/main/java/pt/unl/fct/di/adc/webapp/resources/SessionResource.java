@@ -52,7 +52,7 @@ public class SessionResource {
         }
 
         try{
-            Query<Entity> query = Query.newEntityQueryBuilder().setKind("AuthToken").build();
+            Query<Entity> query = Query.newEntityQueryBuilder().setKind("Sessions").build();
 
             QueryResults<Entity> sessions = datastore.run(query);
 

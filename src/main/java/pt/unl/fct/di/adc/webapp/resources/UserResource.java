@@ -118,8 +118,8 @@ public class UserResource {
         try{
             datastore.delete(keyTargetUser);
 
-            Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("AuthToken")
-                    .setFilter(PropertyFilter.eq("user_name", inputUser.getUsername())).build();     // ex: SELECT * FROM AuthToken WHERE user_name = 'tp@adc.pt'
+            Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
+                    .setFilter(PropertyFilter.eq("user_name", inputUser.getUsername())).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
 
             QueryResults<Entity> tokens = datastore.run(tokenQuery);
 
