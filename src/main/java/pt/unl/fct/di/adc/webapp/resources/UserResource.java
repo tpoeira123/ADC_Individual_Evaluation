@@ -8,7 +8,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.checkerframework.checker.units.qual.A;
 import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.enums.Role;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
@@ -282,6 +281,75 @@ public class UserResource {
 
             response = new ApiResponse(codeError, description);
 
+            return Response.ok(g.toJson(response)).build();
+        }
+    }
+
+
+    @POST
+    @Path("changeuserrole")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response changeUserRoles(InputRequest<UserData> input) {
+        UserData inputUser = input.getInput();
+        AuthToken inputToken = input.getToken();
+
+        String newRole = inputUser.getNewRole();
+        String username = inputUser.getUsername();
+        ApiResponse response;
+
+        if(Role.hasString(newRole) == null) {
+            String codeError = String.valueOf(ErrorCodes.INVALID_INPUT.getErrorCode());
+            String description = ErrorCodes.INVALID_INPUT.getDescription();
+
+            response = new ApiResponse(codeError, description);
+
+            return Response.ok(g.toJson(response)).build();
+        }
+
+        TokenValidator validate = new TokenValidator();
+        Entity token = validate.validateToken(inputToken, Role.ADMIN);
+        if ( token == null) {
+            return Response.ok(g.toJson(validate.getErrorResponse())).build();
+        }
+
+        Key keyTargetUser =  datastore.newKeyFactory().setKind("User").newKey(username);
+        Entity targetUser =  datastore.get(keyTargetUser);
+
+        if (targetUser == null) {
+            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
+            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
+            response = new ApiResponse(codeError, description);
+            return Response.ok(g.toJson(response)).build();
+        }
+        try{
+            Entity.Builder updatedUser = Entity.newBuilder(targetUser);
+
+            updatedUser.set("user_role", newRole);
+
+            datastore.put(updatedUser.build());
+
+            Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
+                    .setFilter(PropertyFilter.eq("user_name", username)).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
+
+            QueryResults<Entity> tokens = datastore.run(tokenQuery);
+
+            while (tokens.hasNext()) {
+                Entity existingToken = tokens.next();
+                Entity updatedToken = Entity.newBuilder(existingToken).set("user_role", newRole).build();
+
+                datastore.put(updatedToken);
+            }
+
+            Map<String, Object> success = new LinkedHashMap<>();
+            success.put("message", "Updated successfully");
+            response = new ApiResponse("success", success);
+            return Response.ok(g.toJson(response)).build();
+
+        }catch (Exception e){
+            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
+            String description = ErrorCodes.FORBIDDEN.getDescription();
+            response = new ApiResponse(codeError, description);
             return Response.ok(g.toJson(response)).build();
         }
     }

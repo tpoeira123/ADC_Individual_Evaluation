@@ -29,7 +29,7 @@ public class TokenValidator {
             return null;
         }
 
-        Key key = datastore.newKeyFactory().setKind("AuthToken").newKey(inputToken.getTokenId());
+        Key key = datastore.newKeyFactory().setKind("Sessions").newKey(inputToken.getTokenId());
 
         Entity token =  datastore.get(key);
 
