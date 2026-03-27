@@ -87,9 +87,6 @@ public class UserResource {
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
         }
 
-        Key key = datastore.newKeyFactory().setKind("User").newKey(token.getString("user_name"));
-        Entity userDeleting = datastore.get(key);
-
         Key keyTargetUser =  datastore.newKeyFactory().setKind("User").newKey(inputUser.getUsername());
         Entity targetUser =  datastore.get(keyTargetUser);
 
@@ -102,7 +99,7 @@ public class UserResource {
             return Response.ok(g.toJson(response)).build();
         }
 
-        String deletingUsername = userDeleting.getString("user_name");
+        String deletingUsername = token.getString("user_name");
         String targetedUsername = targetUser.getString("user_name");
         String targetedRole = targetUser.getString("user_role");
 
@@ -170,9 +167,6 @@ public class UserResource {
             return Response.ok(g.toJson(response)).build();
         }
 
-        Key key = datastore.newKeyFactory().setKind("User").newKey(token.getString("user_name"));
-        Entity modifyingUser = datastore.get(key);
-
         Key keyTargetUser = datastore.newKeyFactory().setKind("User").newKey(inputUser.getUsername());
         Entity targetUser = datastore.get(keyTargetUser);
 
@@ -185,8 +179,8 @@ public class UserResource {
             return Response.ok(g.toJson(response)).build();
         }
 
-        String modifyingUsername = modifyingUser.getString("user_name");
-        String modifyingRole = modifyingUser.getString("user_role");
+        String modifyingUsername = token.getString("user_name");
+        String modifyingRole = token.getString("user_role");
         String targetedUsername = targetUser.getString("user_name");
         String targetedRole = targetUser.getString("user_role");
 
