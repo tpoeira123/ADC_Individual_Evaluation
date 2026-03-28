@@ -5,7 +5,6 @@ pt\unl\fct\di\adc\webapp\response\ResponseResource.class
 pt\unl\fct\di\adc\webapp\resources\LoginResource.class
 pt\unl\fct\di\adc\webapp\resources\CreateAccountResource.class
 pt\unl\fct\di\adc\webapp\util\UserData.class
-pt\unl\fct\di\adc\webapp\exceptions\JsonException.class
 pt\unl\fct\di\adc\webapp\resources\SessionResource.class
 pt\unl\fct\di\adc\webapp\resources\LogoutResource.class
 pt\unl\fct\di\adc\webapp\util\LoginData.class

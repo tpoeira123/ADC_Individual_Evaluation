@@ -93,10 +93,6 @@ public class UserResource extends ResponseResource {
         if (targetUser == null)
             return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
-        String targetedRole = targetUser.getString("user_role");
-        if (!targetUsername.equals(tokenUsername) && targetedRole.equals(Role.ADMIN.toString()))
-            return errorResponse(ErrorCodes.UNAUTHORIZED);
-
         try {
             datastore.delete(keyTargetUser);
 
