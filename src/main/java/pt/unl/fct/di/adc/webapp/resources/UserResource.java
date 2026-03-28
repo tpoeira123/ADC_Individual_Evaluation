@@ -12,6 +12,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.enums.Role;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
+import pt.unl.fct.di.adc.webapp.response.ResponseResource;
 import pt.unl.fct.di.adc.webapp.util.*;
 import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 import com.google.cloud.datastore.StructuredQuery.*;
@@ -20,7 +21,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 @Path("/")
-public class UserResource {
+public class UserResource extends ResponseResource {
 
     private static final Logger LOG = Logger.getLogger(UserResource.class.getName());
 
@@ -30,31 +31,28 @@ public class UserResource {
     // connects the application to a database in Google Cloud
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
-    public UserResource() {}
+    public UserResource() {
+    }
+
 
     @POST
     @Path("/showusers")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response showUsers(InputRequest<Object> input) {
-        AuthToken inputToken = input.getToken();
 
-        ApiResponse response;
+        LOG.fine("Trying to show users in the database");
 
         TokenValidator validate = new TokenValidator();
+        Entity token = validate.validateToken(input.getToken(), Role.ADMIN, Role.BOFFICER);
 
-        Entity token = validate.validateToken(inputToken, Role.BOFFICER, Role.ADMIN);
-
-        if ( token == null) {
+        if (token == null)
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
-        }
 
         Query<Entity> query = Query.newEntityQueryBuilder().setKind("User").build();
-
         QueryResults<Entity> users = datastore.run(query);
 
         List<Map<String, Object>> usersList = new ArrayList<>();
-
         while (users.hasNext()) {
             Entity user = users.next();
             Map<String, Object> userMap = new LinkedHashMap<>();
@@ -63,12 +61,12 @@ public class UserResource {
             usersList.add(userMap);
         }
 
+        LOG.fine("Showing users");
+
         Map<String, Object> success = new LinkedHashMap<>();
         success.put("users", usersList);
 
-        response = new ApiResponse("success", success);
-
-        return Response.ok(g.toJson(response)).build();
+        return successResponse(success);
     }
 
 
@@ -77,66 +75,44 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteAccount(InputRequest<UserData> input) {
-        UserData inputUser = input.getInput();
-        AuthToken inputToken = input.getToken();
-        ApiResponse response;
+
+        LOG.fine("Trying to delete account " + input.getInput().getUsername() + "of the database");
 
         TokenValidator validate = new TokenValidator();
-        Entity token = validate.validateToken(inputToken, Role.ADMIN);
-        if ( token == null) {
+        Entity token = validate.validateToken(input.getToken(), Role.ADMIN);
+
+        if (token == null)
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
-        }
 
-        Key keyTargetUser =  datastore.newKeyFactory().setKind("User").newKey(inputUser.getUsername());
-        Entity targetUser =  datastore.get(keyTargetUser);
+        String tokenUsername = token.getString("user_name");
+        String targetUsername = input.getInput().getUsername();
 
-        if (targetUser == null) {
-            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
-            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
+        Key keyTargetUser = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
+        Entity targetUser = datastore.get(keyTargetUser);
 
-            response = new ApiResponse(codeError, description);
+        if (targetUser == null)
+            return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
-            return Response.ok(g.toJson(response)).build();
-        }
-
-        String deletingUsername = token.getString("user_name");
-        String targetedUsername = targetUser.getString("user_name");
         String targetedRole = targetUser.getString("user_role");
+        if (!targetUsername.equals(tokenUsername) && targetedRole.equals(Role.ADMIN.toString()))
+            return errorResponse(ErrorCodes.UNAUTHORIZED);
 
-        if (!targetedUsername.equals(deletingUsername) && targetedRole.equals(Role.ADMIN.toString())) {
-            String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
-            String description = ErrorCodes.UNAUTHORIZED.getDescription();
-
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
-
-        try{
+        try {
             datastore.delete(keyTargetUser);
 
             Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
-                    .setFilter(PropertyFilter.eq("user_name", inputUser.getUsername())).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
+                    .setFilter(PropertyFilter.eq("user_name", targetUsername)).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
 
             QueryResults<Entity> tokens = datastore.run(tokenQuery);
-
             while (tokens.hasNext()) {
                 datastore.delete(tokens.next().getKey());
             }
 
-            Map<String, Object> success = new LinkedHashMap<>();
-            success.put("message", "Account deleted successfully");
+            LOG.fine("Account " + input.getInput().getUsername() + "deleted, along side is tokens");
 
-            response = new ApiResponse("success", success);
-
-            return Response.ok(g.toJson(response)).build();
-        }catch (Exception e){
-            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
-            String description = ErrorCodes.FORBIDDEN.getDescription();
-
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
+            return successResponse(messageData("Account deleted successfully"));
+        } catch (Exception e) {
+            return errorResponse(ErrorCodes.FORBIDDEN);
         }
     }
 
@@ -145,82 +121,56 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response modifyAccount(InputRequest<UserData> input) {
-        UserData inputUser = input.getInput();
-        AuthToken inputToken = input.getToken();
-        AttributesData attributes = inputUser.getAttributes();
 
-        ApiResponse response;
+        LOG.fine("Trying to modify account " + input.getInput().getUsername() + "of the database");
 
         TokenValidator validate = new TokenValidator();
-        Entity token = validate.validateToken(inputToken, Role.ADMIN, Role.BOFFICER, Role.USER);
+        Entity token = validate.validateToken(input.getToken(), Role.ADMIN, Role.BOFFICER, Role.USER);
 
-        if (token == null) {
+        if (token == null)
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
-        }
 
-        if (attributes == null) {
-            String codeError = String.valueOf(ErrorCodes.INVALID_INPUT.getErrorCode());
-            String description = ErrorCodes.INVALID_INPUT.getDescription();
+        UserData inputUser = input.getInput();
+        AttributesData attributes = inputUser.getAttributes();
 
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
+        if (attributes == null)
+            return errorResponse(ErrorCodes.INVALID_INPUT);
 
         Key keyTargetUser = datastore.newKeyFactory().setKind("User").newKey(inputUser.getUsername());
         Entity targetUser = datastore.get(keyTargetUser);
 
-        if (targetUser == null) {
-            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
-            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
-
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
+        if (targetUser == null)
+            return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
         String modifyingUsername = token.getString("user_name");
         String modifyingRole = token.getString("user_role");
+
         String targetedUsername = targetUser.getString("user_name");
         String targetedRole = targetUser.getString("user_role");
 
-        if (modifyingRole.equals(Role.USER.toString())) {
-            if (!modifyingUsername.equals(targetedUsername)) {
-                String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
-                String description = ErrorCodes.UNAUTHORIZED.getDescription();
-                response = new ApiResponse(codeError, description);
-                return Response.ok(g.toJson(response)).build();
-            }
-        } else if (modifyingRole.equals(Role.BOFFICER.toString())) {
-            if (!modifyingUsername.equals(targetedUsername) && !targetedRole.equals(Role.USER.toString())) {
-                String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
-                String description = ErrorCodes.UNAUTHORIZED.getDescription();
-                response = new ApiResponse(codeError, description);
-                return Response.ok(g.toJson(response)).build();
-            }
-        }
+        if (modifyingRole.equals(Role.USER.toString()) && !modifyingUsername.equals(targetedUsername))
+            return errorResponse(ErrorCodes.UNAUTHORIZED);
 
-        try{
+        else if (modifyingRole.equals(Role.BOFFICER.toString()) && !modifyingUsername.equals(targetedUsername)
+                && !targetedRole.equals(Role.USER.toString()))
+            return errorResponse(ErrorCodes.UNAUTHORIZED);
+
+
+        try {
             Entity.Builder updatedUser = Entity.newBuilder(targetUser);
-            if (attributes.getAddress() != null && !attributes.getAddress().isBlank()) {
+            if (attributes.getAddress() != null && !attributes.getAddress().isBlank())
                 updatedUser.set("user_address", attributes.getAddress());
-            }
-            if (attributes.getPhone() != null && !attributes.getPhone().isBlank()) {
+
+            if (attributes.getPhone() != null && !attributes.getPhone().isBlank())
                 updatedUser.set("user_phone", attributes.getPhone());
-            }
 
             datastore.put(updatedUser.build());
 
-            Map<String, Object> success = new LinkedHashMap<>();
-            success.put("message", "Updated successfully");
-            response = new ApiResponse("success", success);
+            LOG.fine("Account " + targetedUsername + "modified");
 
-            return Response.ok(g.toJson(response)).build();
-        }catch (Exception e){
-            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
-            String description = ErrorCodes.FORBIDDEN.getDescription();
-            response = new ApiResponse(codeError, description);
-            return Response.ok(g.toJson(response)).build();
+            return successResponse(messageData("Updated successfully"));
+        } catch (Exception e) {
+            return errorResponse(ErrorCodes.FORBIDDEN);
         }
     }
 
@@ -229,46 +179,30 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response showUserRoles(InputRequest<UserData> input) {
-        UserData inputUser = input.getInput();
-        AuthToken inputToken = input.getToken();
-        ApiResponse response;
+
+        LOG.fine("Trying to show user roles in the database");
 
         TokenValidator validate = new TokenValidator();
-        Entity token = validate.validateToken(inputToken, Role.ADMIN, Role.BOFFICER);
-        if ( token == null) {
+        Entity token = validate.validateToken(input.getToken(), Role.ADMIN, Role.BOFFICER);
+        if (token == null)
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
-        }
 
-        Key keyTargetUser =  datastore.newKeyFactory().setKind("User").newKey(inputUser.getUsername());
-        Entity targetUser =  datastore.get(keyTargetUser);
+        Key keyTargetUser = datastore.newKeyFactory().setKind("User").newKey(input.getInput().getUsername());
+        Entity targetUser = datastore.get(keyTargetUser);
 
-        if (targetUser == null) {
-            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
-            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
+        if (targetUser == null)
+            return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
-
-        try{
-            String targetedUsername = targetUser.getString("user_name");
-            String targetedRole = targetUser.getString("user_role");
-
+        try {
             Map<String, Object> success = new LinkedHashMap<>();
-            success.put("username", targetedUsername);
-            success.put("role", targetedRole);
+            success.put("username", targetUser.getString("user_name"));
+            success.put("role", targetUser.getString("user_role"));
 
-            response = new ApiResponse("success", success);
+            LOG.fine("Showing user roles in the database");
 
-            return Response.ok(g.toJson(response)).build();
-        }catch (Exception e){
-            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
-            String description = ErrorCodes.FORBIDDEN.getDescription();
-
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
+            return successResponse(success);
+        } catch (Exception e) {
+            return errorResponse(ErrorCodes.FORBIDDEN);
         }
     }
 
@@ -278,49 +212,41 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response changeUserRoles(InputRequest<UserData> input) {
-        UserData inputUser = input.getInput();
-        AuthToken inputToken = input.getToken();
 
-        String newRole = inputUser.getNewRole();
-        String username = inputUser.getUsername();
-        ApiResponse response;
+        LOG.fine("Trying to change " + input.getInput().getUsername() + " role in the database to " + input.getInput().getNewRole());
 
-        if(Role.hasString(newRole) == null) {
-            String codeError = String.valueOf(ErrorCodes.INVALID_INPUT.getErrorCode());
-            String description = ErrorCodes.INVALID_INPUT.getDescription();
+        String newRole = input.getInput().getNewRole();
 
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
+        if (Role.hasString(newRole) == null)
+            return errorResponse(ErrorCodes.INVALID_INPUT);
 
         TokenValidator validate = new TokenValidator();
-        Entity token = validate.validateToken(inputToken, Role.ADMIN);
-        if ( token == null) {
+        Entity token = validate.validateToken(input.getToken(), Role.ADMIN);
+        if (token == null)
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
-        }
 
-        Key keyTargetUser =  datastore.newKeyFactory().setKind("User").newKey(username);
-        Entity targetUser =  datastore.get(keyTargetUser);
+        String targetUsername = input.getInput().getUsername();
 
-        if (targetUser == null) {
-            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
-            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
-            response = new ApiResponse(codeError, description);
-            return Response.ok(g.toJson(response)).build();
-        }
-        try{
+        Key keyTargetUser = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
+        Entity targetUser = datastore.get(keyTargetUser);
+
+        if (targetUser == null)
+            return errorResponse(ErrorCodes.USER_NOT_FOUND);
+
+        String tokenUsername =  token.getString("user_name");
+        if (input.getInput().getUsername().equals(tokenUsername))
+            return errorResponse(ErrorCodes.FORBIDDEN);
+
+        try {
             Entity.Builder updatedUser = Entity.newBuilder(targetUser);
-
             updatedUser.set("user_role", newRole);
 
             datastore.put(updatedUser.build());
 
             Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
-                    .setFilter(PropertyFilter.eq("user_name", username)).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
+                    .setFilter(PropertyFilter.eq("user_name", targetUsername)).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
 
             QueryResults<Entity> tokens = datastore.run(tokenQuery);
-
             while (tokens.hasNext()) {
                 Entity existingToken = tokens.next();
                 Entity updatedToken = Entity.newBuilder(existingToken).set("user_role", newRole).build();
@@ -328,92 +254,62 @@ public class UserResource {
                 datastore.put(updatedToken);
             }
 
-            Map<String, Object> success = new LinkedHashMap<>();
-            success.put("message", "\"Role updated successfully");
-            response = new ApiResponse("success", success);
-            return Response.ok(g.toJson(response)).build();
+            LOG.fine("Changed " + input.getInput().getUsername() + " role in the database to " + input.getInput().getNewRole());
 
-        }catch (Exception e){
-            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
-            String description = ErrorCodes.FORBIDDEN.getDescription();
-            response = new ApiResponse(codeError, description);
-            return Response.ok(g.toJson(response)).build();
+            return successResponse(messageData("Role updated successfully"));
+
+        } catch (Exception e) {
+            return  errorResponse(ErrorCodes.FORBIDDEN);
         }
     }
-
 
 
     @POST
     @Path("/changeuserpwd")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public  Response changeUserPassword(InputRequest<UserData> input) {
+    public Response changeUserPassword(InputRequest<UserData> input) {
+
+        LOG.fine("Trying to change " + input.getInput().getUsername() + " password");
+
+        TokenValidator validate = new TokenValidator();
+        Entity token = validate.validateToken(input.getToken(), Role.ADMIN, Role.BOFFICER, Role.USER);
+
+        if (token == null)
+            return Response.ok(g.toJson(validate.getErrorResponse())).build();
+
         UserData inputUser = input.getInput();
-        String username = inputUser.getUsername();
+        String targetUsername = inputUser.getUsername();
+        String tokenUsername = token.getString("user_name");
+
+        if (!tokenUsername.equals(targetUsername))
+            return errorResponse(ErrorCodes.UNAUTHORIZED);
+
+        Key keyTargetUser = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
+        Entity targetUser = datastore.get(keyTargetUser);
 
         String oldPassword = inputUser.getOldPassword();
         String newPassword = inputUser.getNewPassword();
 
-        AuthToken inputToken = input.getToken();
+        if (targetUser == null)
+            return errorResponse(ErrorCodes.USER_NOT_FOUND);
+        else if (!targetUser.getString("user_pwd").equals(DigestUtils.sha512Hex(oldPassword)))
+            return errorResponse(ErrorCodes.INVALID_CREDENTIALS);
 
-        ApiResponse response;
+        if (newPassword == null || newPassword.isBlank())
+            return errorResponse(ErrorCodes.INVALID_INPUT);
 
-        if (newPassword == null || newPassword.isBlank()){
-            String codeError = String.valueOf(ErrorCodes.INVALID_INPUT.getErrorCode());
-            String description = ErrorCodes.INVALID_INPUT.getDescription();
-            response = new ApiResponse(codeError, description);
-            return Response.ok(g.toJson(response)).build();
-        }
-
-        TokenValidator validate = new TokenValidator();
-        Entity token = validate.validateToken(inputToken, Role.ADMIN, Role.BOFFICER,  Role.USER);
-        if ( token == null) {
-            return Response.ok(g.toJson(validate.getErrorResponse())).build();
-        }
-
-        String userNameToken = token.getString("user_name");
-        if (!userNameToken.equals(username)) {
-            String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
-            String description = ErrorCodes.UNAUTHORIZED.getDescription();
-
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
-
-        Key keyUser =  datastore.newKeyFactory().setKind("User").newKey(username);
-        Entity user =  datastore.get(keyUser);
-
-        if (user == null) {
-            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
-            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
-            response = new ApiResponse(codeError, description);
-            return Response.ok(g.toJson(response)).build();
-        }
-        else if(!user.getString("user_pwd").equals(DigestUtils.sha512Hex(oldPassword))) {
-            String codeError = String.valueOf(ErrorCodes.INVALID_CREDENTIALS.getErrorCode());
-            String description = ErrorCodes.INVALID_CREDENTIALS.getDescription();
-            response = new ApiResponse(codeError, description);
-            return Response.ok(g.toJson(response)).build();
-        }
-        try{
-            Entity.Builder updatedUser = Entity.newBuilder(user);
-
+        try {
+            Entity.Builder updatedUser = Entity.newBuilder(targetUser);
             updatedUser.set("user_pwd", DigestUtils.sha512Hex(newPassword));
 
             datastore.put(updatedUser.build());
 
+            LOG.fine("Password of " + input.getInput().getUsername() + " changed");
 
-            Map<String, Object> success = new LinkedHashMap<>();
-            success.put("message", "Password changed successfully");
-            response = new ApiResponse("success", success);
-            return Response.ok(g.toJson(response)).build();
-
-        }catch (Exception e){
-            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
-            String description = ErrorCodes.FORBIDDEN.getDescription();
-            response = new ApiResponse(codeError, description);
-            return Response.ok(g.toJson(response)).build();
+            return successResponse(messageData("Password changed successfully"));
+        } catch (Exception e) {
+            return errorResponse(ErrorCodes.FORBIDDEN);
         }
     }
 }

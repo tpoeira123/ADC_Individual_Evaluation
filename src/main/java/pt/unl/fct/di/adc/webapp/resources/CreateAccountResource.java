@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.Response;
 import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
+import pt.unl.fct.di.adc.webapp.response.ResponseResource;
 import pt.unl.fct.di.adc.webapp.util.CreateAccountData;
 
 import java.util.LinkedHashMap;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 @Path("/")
-public class CreateAccountResource {
+public class CreateAccountResource extends ResponseResource {
 
     private static final Logger LOG = Logger.getLogger(CreateAccountResource.class.getName());
 
@@ -30,7 +31,8 @@ public class CreateAccountResource {
     // connects the application to a database in Google Cloud
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
-    public CreateAccountResource() {}
+    public CreateAccountResource() {
+    }
 
 
     @POST
@@ -43,47 +45,31 @@ public class CreateAccountResource {
 
         LOG.fine("Creating account: " + data.getUsername());
 
-        ApiResponse response;
 
-        if(!data.validRegistration()){
-            String codeError = String.valueOf(ErrorCodes.INVALID_INPUT.getErrorCode());
-            String description = ErrorCodes.INVALID_INPUT.getDescription();
+        if (!data.validRegistration())
+            return errorResponse(ErrorCodes.INVALID_INPUT);
 
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
 
         Key key = datastore.newKeyFactory().setKind("User").newKey(data.getUsername());
 
-        Entity user = datastore.get(key);
+        if (datastore.get(key) != null)
+            return errorResponse(ErrorCodes.USER_ALREADY_EXISTS);
 
-        if (user == null){
-            user = Entity.newBuilder(key).set("user_name", data.getUsername())
-                    .set("user_pwd", DigestUtils.sha512Hex(data.getPassword()))
-                    .set("user_phone", data.getPhone())
-                    .set("user_address", data.getAddress())
-                    .set("user_role", data.getRole())
-                    .build();
 
-            datastore.put(user);
-            LOG.fine("User: " + data.getUsername() + " has been created.");
-        }
-        else {
-            String codeError = String.valueOf(ErrorCodes.USER_ALREADY_EXISTS.getErrorCode());
-            String description = ErrorCodes.USER_ALREADY_EXISTS.getDescription();
+        Entity user = Entity.newBuilder(key).set("user_name", data.getUsername())
+                .set("user_pwd", DigestUtils.sha512Hex(data.getPassword()))
+                .set("user_phone", data.getPhone())
+                .set("user_address", data.getAddress())
+                .set("user_role", data.getRole()).build();
 
-            response = new ApiResponse(codeError, description);
+        datastore.put(user);
 
-            return Response.ok(g.toJson(response)).build();
-        }
+        LOG.fine("User: " + data.getUsername() + " has been created.");
 
         Map<String, Object> success = new LinkedHashMap<>();
         success.put("username", data.getUsername());
         success.put("role", data.getRole());
 
-        response = new ApiResponse("success", success);
-
-        return Response.ok(g.toJson(response)).build();
+        return successResponse(success);
     }
 }

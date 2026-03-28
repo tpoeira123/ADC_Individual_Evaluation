@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class AuthToken {
 
-    public static final long EXPIRATION_TIME = 60*60*2;  // 900 - 15 min
+    public static final long EXPIRATION_TIME = 900;  // 15 min
     
     private String tokenId;
     private String username;

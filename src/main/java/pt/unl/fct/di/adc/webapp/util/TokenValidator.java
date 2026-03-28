@@ -25,7 +25,6 @@ public class TokenValidator {
             String description = ErrorCodes.INVALID_TOKEN.getDescription();
 
             errorResponse = new ApiResponse(codeError, description);
-
             return null;
         }
 
@@ -38,7 +37,6 @@ public class TokenValidator {
             String description = ErrorCodes.INVALID_TOKEN.getDescription();
 
             errorResponse = new ApiResponse(codeError, description);
-
             return null;
         }
 
@@ -48,14 +46,13 @@ public class TokenValidator {
             String description = ErrorCodes.TOKEN_EXPIRED.getDescription();
 
             errorResponse = new ApiResponse(codeError, description);
-
+            datastore.delete(token.getKey());
             return null;
         }
 
         String role = token.getString("user_role");
 
-        boolean authorized = Arrays.stream(allowedRoles)
-                .anyMatch(r -> r.name().equals(role));
+        boolean authorized = Arrays.stream(allowedRoles).anyMatch(r -> r.name().equals(role));
 
         if (!authorized) {
             String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());

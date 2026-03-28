@@ -10,10 +10,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jdk.jfr.RecordingState;
+import org.glassfish.jersey.server.model.internal.ResourceMethodDispatcherFactory;
 import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.enums.Role;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
 import pt.unl.fct.di.adc.webapp.response.ApiResponse;
+import pt.unl.fct.di.adc.webapp.response.ResponseResource;
 import pt.unl.fct.di.adc.webapp.util.AuthToken;
 import pt.unl.fct.di.adc.webapp.util.LogoutData;
 import pt.unl.fct.di.adc.webapp.util.TokenValidator;
@@ -23,7 +25,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 @Path("/")
-public class LogoutResource {
+public class LogoutResource extends ResponseResource {
 
     private static final Logger LOG = Logger.getLogger(UserResource.class.getName());
 
@@ -33,78 +35,54 @@ public class LogoutResource {
     // connects the application to a database in Google Cloud
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
-    public LogoutResource() {}
+
+    public LogoutResource() {
+    }
 
     @POST
     @Path("/logout")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response logout(InputRequest<LogoutData> input) {
-        LogoutData logoutData = input.getInput();
-        String userLoggingOut = logoutData.getUsername();
 
-        AuthToken inputToken = input.getToken();
-
-        ApiResponse response;
+        LOG.fine("Trying to logout " + input.getInput().getUsername() + " of the database");
 
         TokenValidator validate = new TokenValidator();
+        Entity token = validate.validateToken(input.getToken(), Role.ADMIN, Role.BOFFICER, Role.USER);
 
-        Entity token = validate.validateToken(inputToken, Role.ADMIN, Role.BOFFICER,  Role.USER);
-        if ( token == null) {
+        if (token == null)
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
-        }
 
-        Key keyLoggingOut = datastore.newKeyFactory().setKind("User").newKey(userLoggingOut);
-        Entity loggingOut = datastore.get(keyLoggingOut);
+        String targetUsername = input.getInput().getUsername();
+        String tokenUsername = token.getString("user_name");
+        String tokenRole = token.getString("user_role");
 
-        if (loggingOut == null) {
-            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
-            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
+        Key keyTargetUser = datastore.newKeyFactory().setKind("User").newKey(targetUsername);
+        if (datastore.get(keyTargetUser) == null)
+            return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
-            response = new ApiResponse(codeError, description);
+        if (!tokenRole.equals(Role.ADMIN.toString()) && !tokenUsername.equals(targetUsername))
+            return errorResponse(ErrorCodes.UNAUTHORIZED);
 
-            return Response.ok(g.toJson(response)).build();
-        }
-
-        String userNameToken = token.getString("user_name");
-        String userRoleToken = token.getString("user_role");
-
-        if (userRoleToken.equals(Role.USER.toString())) {
-            if (!userNameToken.equals(userLoggingOut)) {
-                String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
-                String description = ErrorCodes.UNAUTHORIZED.getDescription();
-                response = new ApiResponse(codeError, description);
-                return Response.ok(g.toJson(response)).build();
-            }
-        } else if (userRoleToken.equals(Role.BOFFICER.toString())) {
-            if (!userNameToken.equals(userLoggingOut)) {
-                String codeError = String.valueOf(ErrorCodes.UNAUTHORIZED.getErrorCode());
-                String description = ErrorCodes.UNAUTHORIZED.getDescription();
-                response = new ApiResponse(codeError, description);
-                return Response.ok(g.toJson(response)).build();
-            }
-        }
         try {
-            Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
-                    .setFilter(StructuredQuery.PropertyFilter.eq("user_name", userLoggingOut)).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
+            if (tokenRole.equals(Role.ADMIN.toString()) && !tokenUsername.equals(targetUsername)) {
 
-            QueryResults<Entity> tokens = datastore.run(tokenQuery);
+                Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
+                        .setFilter(StructuredQuery.PropertyFilter.eq("user_name", targetUsername)).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
 
-            while (tokens.hasNext()) {
-                datastore.delete(tokens.next().getKey());
+                QueryResults<Entity> tokens = datastore.run(tokenQuery);
+                while (tokens.hasNext()) {
+                    datastore.delete(tokens.next().getKey());
+                }
             }
+            else
+                datastore.delete(token.getKey());
 
-            Map<String, Object> success = new LinkedHashMap<>();
-            success.put("message", "Logout successful");
+            LOG.fine("User " + input.getInput().getUsername() + " logged out");
 
-            response = new ApiResponse("success", success);
-
-            return Response.ok(g.toJson(response)).build();
-        }catch (Exception e) {
-            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
-            String description = ErrorCodes.FORBIDDEN.getDescription();
-            response = new ApiResponse(codeError, description);
-            return Response.ok(g.toJson(response)).build();
+            return successResponse(messageData("Logout successful"));
+        } catch (Exception e) {
+            return errorResponse(ErrorCodes.FORBIDDEN);
         }
     }
 }

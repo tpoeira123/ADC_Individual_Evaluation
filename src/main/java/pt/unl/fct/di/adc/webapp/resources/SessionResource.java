@@ -12,6 +12,7 @@ import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.enums.Role;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
 import pt.unl.fct.di.adc.webapp.response.ApiResponse;
+import pt.unl.fct.di.adc.webapp.response.ResponseResource;
 import pt.unl.fct.di.adc.webapp.util.AuthToken;
 import pt.unl.fct.di.adc.webapp.util.TokenValidator;
 
@@ -22,7 +23,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 @Path("/")
-public class SessionResource {
+public class SessionResource extends ResponseResource {
 
     private static final Logger LOG = Logger.getLogger(UserResource.class.getName());
 
@@ -39,25 +40,20 @@ public class SessionResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response showAuthenticationSessions(InputRequest<Object> input){
-        AuthToken inputToken = input.getToken();
 
-        ApiResponse response;
+        LOG.fine("Trying to show sessions");
 
         TokenValidator validate = new TokenValidator();
+        Entity token = validate.validateToken(input.getToken(), Role.ADMIN);
 
-        Entity token = validate.validateToken(inputToken, Role.ADMIN);
-
-        if ( token == null) {
+        if (token == null)
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
-        }
 
         try{
             Query<Entity> query = Query.newEntityQueryBuilder().setKind("Sessions").build();
-
             QueryResults<Entity> sessions = datastore.run(query);
 
             List<Map<String, Object>> sessionsList = new ArrayList<>();
-
             while (sessions.hasNext()) {
                 Entity user = sessions.next();
                 Map<String, Object> sessionsMap = new LinkedHashMap<>();
@@ -71,16 +67,11 @@ public class SessionResource {
             Map<String, Object> success = new LinkedHashMap<>();
             success.put("sessions", sessionsList);
 
-            response = new ApiResponse("success", success);
+            LOG.fine("Showing sessions");
 
-            return Response.ok(g.toJson(response)).build();
+            return successResponse(success);
         }catch (Exception e){
-            String codeError = String.valueOf(ErrorCodes.FORBIDDEN.getErrorCode());
-            String description = ErrorCodes.FORBIDDEN.getDescription();
-
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
+            return errorResponse(ErrorCodes.FORBIDDEN);
         }
 
     }

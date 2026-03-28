@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.digest.DigestUtils;
 import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
+import pt.unl.fct.di.adc.webapp.response.ResponseResource;
 import pt.unl.fct.di.adc.webapp.util.*;
 import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 
@@ -22,9 +23,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 @Path("/")
-public class LoginResource {
+public class LoginResource extends ResponseResource {
 
-    private static final Logger LOG = Logger.getLogger(CreateAccountResource.class.getName());
+    private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
     // converts an object of java to json format or vice versa
     private final Gson g = new Gson();
@@ -32,7 +33,8 @@ public class LoginResource {
     // connects the application to a database in Google Cloud
     private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
-    public LoginResource() {}
+    public LoginResource() {
+    }
 
     @POST
     @Path("/login")
@@ -42,69 +44,47 @@ public class LoginResource {
 
         LoginData data = input.getInput();
 
-        ApiResponse response;
+        LOG.fine("Login attempt: " + data.getUsername());
 
-        LOG.fine("Login in account: " + data.getUsername());
-
-        if(!data.validLogin()){
-            String codeError = String.valueOf(ErrorCodes.INVALID_INPUT.getErrorCode());
-            String description = ErrorCodes.INVALID_INPUT.getDescription();
-
-            response = new ApiResponse(codeError, description);
-
-            return Response.ok(g.toJson(response)).build();
-        }
+        if (!data.validLogin())
+            return errorResponse(ErrorCodes.INVALID_INPUT);
 
         Key key = datastore.newKeyFactory().setKind("User").newKey(data.getUsername());
-
         Entity user = datastore.get(key);
 
-        if (user == null) {
-            String codeError = String.valueOf(ErrorCodes.USER_NOT_FOUND.getErrorCode());
-            String description = ErrorCodes.USER_NOT_FOUND.getDescription();
+        if (user == null)
+            return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
-            response = new ApiResponse(codeError, description);
 
-            return Response.ok(g.toJson(response)).build();
-        }
-        else{
+        if (!user.getString("user_pwd").equals(DigestUtils.sha512Hex(data.getPassword())))
+            return errorResponse(ErrorCodes.INVALID_CREDENTIALS);
 
-            if(!user.getString("user_pwd").equals(DigestUtils.sha512Hex(data.getPassword()))){
-                String codeError = String.valueOf(ErrorCodes.INVALID_CREDENTIALS.getErrorCode());
-                String description = ErrorCodes.INVALID_CREDENTIALS.getDescription();
 
-                response = new ApiResponse(codeError, description);
+        AuthToken token = new AuthToken(data.getUsername(), user.getString("user_role"));
 
-                return Response.ok(g.toJson(response)).build();
-            }
-            else {
-                AuthToken token = new AuthToken(data.getUsername(), user.getString("user_role"));
+        Key tokenKey = datastore.newKeyFactory().setKind("Sessions").newKey(token.getTokenId());
 
-                Key tokenKey = datastore.newKeyFactory().setKind("Sessions").newKey(token.getTokenId());
+        Entity tokenEntity = Entity.newBuilder(tokenKey).set("token_id", token.getTokenId())
+                .set("user_name", token.getUsername())
+                .set("user_role", token.getRole())
+                .set("issuedAt", token.getIssuedAt())
+                .set("expiresAt", token.getExpiresAt()).build();
 
-                Entity tokenEntity = Entity.newBuilder(tokenKey).set("token_id", token.getTokenId())
-                        .set("user_name", token.getUsername())
-                        .set("user_role", token.getRole())
-                        .set("issuedAt", token.getIssuedAt())
-                        .set("expiresAt", token.getExpiresAt()).build();
+        datastore.put(tokenEntity);
 
-                datastore.put(tokenEntity);
+        LOG.fine("New login created with id: " + token.getTokenId());
 
-                // allows to do the JSON nest without creating a new class
-                Map<String, Object> success = new LinkedHashMap<>();
-                success.put("tokenId", token.getTokenId());
-                success.put("username", token.getUsername());
-                success.put("role", token.getRole());
-                success.put("issuedAt", token.getIssuedAt());
-                success.put("expiresAt", token.getExpiresAt());
+        // allows to do the JSON nest without creating a new class
+        Map<String, Object> displayToken = new LinkedHashMap<>();
+        displayToken.put("tokenId", token.getTokenId());
+        displayToken.put("username", token.getUsername());
+        displayToken.put("role", token.getRole());
+        displayToken.put("issuedAt", token.getIssuedAt());
+        displayToken.put("expiresAt", token.getExpiresAt());
 
-                response = new ApiResponse("success", success);
+        Map<String, Object> success = new LinkedHashMap<>();
+        success.put("token", displayToken);
 
-                return Response.ok(g.toJson(response)).build();
-
-            }
-
-        }
-
+        return successResponse(success);
     }
 }
