@@ -1,6 +1,7 @@
 pt\unl\fct\di\adc\webapp\input\InputRequest.class
 pt\unl\fct\di\adc\webapp\util\TokenValidator.class
 pt\unl\fct\di\adc\webapp\response\ApiResponse.class
+pt\unl\fct\di\adc\webapp\response\ResponseResource.class
 pt\unl\fct\di\adc\webapp\resources\LoginResource.class
 pt\unl\fct\di\adc\webapp\resources\CreateAccountResource.class
 pt\unl\fct\di\adc\webapp\util\UserData.class

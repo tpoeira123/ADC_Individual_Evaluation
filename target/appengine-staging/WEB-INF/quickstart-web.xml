@@ -27,7 +27,7 @@
     </init-param>
     <init-param origin="WebDescriptor(file:///C:/Users/tpoei/IdeaProjects/3%20Ano/2%20Semestre/ADC/ADC_individual_project/target/appengine-staging/WEB-INF/web.xml):2">
       <param-name>jersey.config.server.provider.scanning.recursive</param-name>
-      <param-value>false</param-value>
+      <param-value>true</param-value>
     </init-param>
     <init-param origin="WebDescriptor(file:///C:/Users/tpoei/IdeaProjects/3%20Ano/2%20Semestre/ADC/ADC_individual_project/target/appengine-staging/WEB-INF/web.xml):3">
       <param-name>jersey.config.server.provider.packages</param-name>
