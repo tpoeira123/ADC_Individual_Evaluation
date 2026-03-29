@@ -1,10 +1,16 @@
 package pt.unl.fct.di.adc.webapp.enums;
 
+/**
+ * Defines the Role Access Control levels for the application.
+ */
 public enum Role {
     USER, BOFFICER, ADMIN;
 
-    // valueOf() throws an exception if the String passed doesn't match with the Role Enums, so, if the exception occurs,
-    // we catch the exception and return null
+    /**
+     * Safely converts a String into a Role enum.
+     * @param role The string representation of the role (e.g., "admin", "USER")
+     * @return The corresponding Role enum, or null if the string does not match any valid role.
+     */
     public static Role hasString(String role) {
         try {
             return valueOf(role.toUpperCase());

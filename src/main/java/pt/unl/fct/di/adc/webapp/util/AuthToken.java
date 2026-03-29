@@ -1,10 +1,15 @@
 package pt.unl.fct.di.adc.webapp.util;
 
-
 import java.util.UUID;
 
+
+/**
+ * Represents the token used for authenticated sessions.
+ * Handles the automatic generation of unique IDs and Unix epoch expiration times.
+ */
 public class AuthToken {
 
+    // Token expiration limit set to 15 minutes (in seconds)
     public static final long EXPIRATION_TIME = 900;  // 15 min
     
     private String tokenId;
@@ -15,6 +20,10 @@ public class AuthToken {
 
     public AuthToken() { }
 
+    /**
+     * Generates a brand new authentication token for a newly logged-in user.
+     * Automatically assigns a UUID and calculates the issued/expiration timestamps.
+     */
     public AuthToken(String username, String role) {
         this.username = username;
         this.role = role;

@@ -1,5 +1,9 @@
 package pt.unl.fct.di.adc.webapp.util;
 
+
+/**
+ * Data Transfer Object for parsing the "input" JSON block during the Logout operation (Op10).
+ */
 public class LogoutData {
     private String username;
 

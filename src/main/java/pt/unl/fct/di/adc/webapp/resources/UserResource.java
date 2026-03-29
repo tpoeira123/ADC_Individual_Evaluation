@@ -14,15 +14,19 @@ import pt.unl.fct.di.adc.webapp.enums.Role;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
 import pt.unl.fct.di.adc.webapp.response.ResponseResource;
 import pt.unl.fct.di.adc.webapp.util.*;
-import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 import com.google.cloud.datastore.StructuredQuery.*;
-
 import java.util.*;
 import java.util.logging.Logger;
 
+
+/**
+ * REST endpoint resource for managing User entities (Op3, Op4, Op5, Op7, Op8, Op9).
+ * Handles fetching, modifying, deleting users, and changing roles and passwords.
+ */
 @Path("/")
 public class UserResource extends ResponseResource {
 
+    // Logger instance for recording system events, errors, and debugging info for this specific class
     private static final Logger LOG = Logger.getLogger(UserResource.class.getName());
 
     // converts an object of java to json format or vice versa
@@ -34,7 +38,12 @@ public class UserResource extends ResponseResource {
     public UserResource() {
     }
 
-
+    /**
+     * Lists all registered users (Op3).
+     * The only roles that can perform this method are ADMIN and BOFFICER.
+     * @param input Contains the Token.
+     * @return 200 OK, showing the users of the database, or appropriate error (e.g., 9901, 9906).
+     */
     @POST
     @Path("/showusers")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -49,6 +58,7 @@ public class UserResource extends ResponseResource {
         if (token == null)
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
 
+        // Find all users in the User entity and put them in a list so it can be sent by JSON
         Query<Entity> query = Query.newEntityQueryBuilder().setKind("User").build();
         QueryResults<Entity> users = datastore.run(query);
 
@@ -70,6 +80,12 @@ public class UserResource extends ResponseResource {
     }
 
 
+    /**
+     * Deletes a user account and all their active sessions (Op4).
+     * The only role that can perform this method is ADMIN.
+     * @param input Contains the username we want to delete and the Token.
+     * @return 200 OK with deleting an account, or appropriate error (e.g., 9901, 9906).
+     */
     @POST
     @Path("/deleteaccount")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -94,8 +110,10 @@ public class UserResource extends ResponseResource {
             return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
         try {
+            // Delete the main user entity
             datastore.delete(keyTargetUser);
 
+            // Find and remove all session tokens for this user
             Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
                     .setFilter(PropertyFilter.eq("user_name", targetUsername)).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
 
@@ -104,7 +122,7 @@ public class UserResource extends ResponseResource {
                 datastore.delete(tokens.next().getKey());
             }
 
-            LOG.fine("Account " + input.getInput().getUsername() + "deleted, along side is tokens");
+            LOG.fine("Account " + input.getInput().getUsername() + "deleted, along side is tokens, by " + tokenUsername);
 
             return successResponse(messageData("Account deleted successfully"));
         } catch (Exception e) {
@@ -112,6 +130,14 @@ public class UserResource extends ResponseResource {
         }
     }
 
+
+    /**
+     * Modifies the phone or address attributes of an account (Op5).
+     * Every role can use this method, but with some exceptions:
+     * USER (self only), BOFFICER (self or USERs), ADMIN (anyone).
+     * @param input Contains the username of the user we want to modify, the attributes (phone or address) and the Token.
+     * @return 200 OK with modifying the user attributes, or appropriate error (e.g., 9901, 9906).
+     */
     @POST
     @Path("/modaccount")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -144,6 +170,7 @@ public class UserResource extends ResponseResource {
         String targetedUsername = targetUser.getString("user_name");
         String targetedRole = targetUser.getString("user_role");
 
+        // Enforce the exceptions described above
         if (modifyingRole.equals(Role.USER.toString()) && !modifyingUsername.equals(targetedUsername))
             return errorResponse(ErrorCodes.UNAUTHORIZED);
 
@@ -153,6 +180,7 @@ public class UserResource extends ResponseResource {
 
 
         try {
+            // Entity.Builder allows us to modify the Property of an entity's table
             Entity.Builder updatedUser = Entity.newBuilder(targetUser);
             if (attributes.getAddress() != null && !attributes.getAddress().isBlank())
                 updatedUser.set("user_address", attributes.getAddress());
@@ -170,6 +198,12 @@ public class UserResource extends ResponseResource {
         }
     }
 
+    /**
+     * Shows the role of a specific user (Op7).
+     * The only roles that can perform this method are ADMIN and BOFFICER.
+     * @param input Contains the username of the user we want to see the Role and the Token.
+     * @return 200 OK showing the Role the username passed in the input is, or appropriate error (e.g., 9901, 9906).
+     */
     @POST
     @Path("/showuserrole")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -203,6 +237,13 @@ public class UserResource extends ResponseResource {
     }
 
 
+    /**
+     * Changes the role of a specific user (Op8).
+     * The only role that can perform this method is ADMIN.
+     * Admins cannot change their own roles.
+     * @param input Contains the username of the user we want to change Role, the new Role of the user and the Token.
+     * @return 200 OK with changing the users Role, or appropriate error (e.g., 9901, 9906).
+     */
     @POST
     @Path("/changeuserrole")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -229,16 +270,19 @@ public class UserResource extends ResponseResource {
         if (targetUser == null)
             return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
+        // Prevent Admins from modifying their own role
         String tokenUsername =  token.getString("user_name");
         if (input.getInput().getUsername().equals(tokenUsername))
             return errorResponse(ErrorCodes.FORBIDDEN);
 
         try {
+            // Update the role in the User table
             Entity.Builder updatedUser = Entity.newBuilder(targetUser);
             updatedUser.set("user_role", newRole);
 
             datastore.put(updatedUser.build());
 
+            // Update the role in all session tokens for this user
             Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
                     .setFilter(PropertyFilter.eq("user_name", targetUsername)).build();     // ex: SELECT * FROM Sessions WHERE user_name = 'tp@adc.pt'
 
@@ -259,7 +303,12 @@ public class UserResource extends ResponseResource {
         }
     }
 
-
+    /**
+     * Changes a user's password (Op9).
+     * All roles are allowed to use this method, but users can ONLY change their own password.
+     * @param input Contains the username of the user we want to change the pwd, the old and new pwd, and the Token.
+     * @return 200 OK with modifying the user pwd, or appropriate error (e.g., 9901, 9906).
+     */
     @POST
     @Path("/changeuserpwd")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -278,6 +327,7 @@ public class UserResource extends ResponseResource {
         String targetUsername = inputUser.getUsername();
         String tokenUsername = token.getString("user_name");
 
+        // A user can only change their own password
         if (!tokenUsername.equals(targetUsername))
             return errorResponse(ErrorCodes.UNAUTHORIZED);
 
@@ -296,6 +346,7 @@ public class UserResource extends ResponseResource {
             return errorResponse(ErrorCodes.INVALID_INPUT);
 
         try {
+            // Update the new password in the User table
             Entity.Builder updatedUser = Entity.newBuilder(targetUser);
             updatedUser.set("user_pwd", DigestUtils.sha512Hex(newPassword));
 

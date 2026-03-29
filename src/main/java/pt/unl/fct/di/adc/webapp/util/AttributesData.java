@@ -1,5 +1,11 @@
 package pt.unl.fct.di.adc.webapp.util;
 
+
+/**
+ * Data Transfer Object for the nested "attributes" JSON block.
+ * Used exclusively during the Modify Account operation (Op5) to parse
+ * the specific fields a user is attempting to update.
+ */
 public class AttributesData {
 
     private String phone;

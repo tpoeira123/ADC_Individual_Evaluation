@@ -1,5 +1,11 @@
 package pt.unl.fct.di.adc.webapp.util;
 
+
+/**
+ * A Data Transfer Object used to parse the "input" JSON block across multiple authenticated REST endpoints.
+ * It contains all possible fields needed for Op4, Op5, Op7, Op8, and Op9.
+ * Jackson will safely ignore the fields that are not provided in a specific request.
+ */
 public class UserData {
     private String username;
     private String oldPassword;

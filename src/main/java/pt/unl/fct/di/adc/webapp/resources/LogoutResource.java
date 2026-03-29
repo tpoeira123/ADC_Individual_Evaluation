@@ -9,25 +9,24 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jdk.jfr.RecordingState;
-import org.glassfish.jersey.server.model.internal.ResourceMethodDispatcherFactory;
 import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.enums.Role;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
-import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 import pt.unl.fct.di.adc.webapp.response.ResponseResource;
-import pt.unl.fct.di.adc.webapp.util.AuthToken;
 import pt.unl.fct.di.adc.webapp.util.LogoutData;
 import pt.unl.fct.di.adc.webapp.util.TokenValidator;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
+
+/**
+ * REST endpoint resource for handling User Logouts (Op10).
+ * Invalidates sessions by removing them from the Datastore.
+ */
 @Path("/")
 public class LogoutResource extends ResponseResource {
 
-    private static final Logger LOG = Logger.getLogger(UserResource.class.getName());
+    // Logger instance for recording system events, errors, and debugging info for this specific class
+    private static final Logger LOG = Logger.getLogger(LogoutResource.class.getName());
 
     // converts an object of java to json format or vice versa
     private final Gson g = new Gson();
@@ -39,6 +38,12 @@ public class LogoutResource extends ResponseResource {
     public LogoutResource() {
     }
 
+    /**
+     * Logs out a user by deleting their active token(s).
+     * Standard USERs/BOFFICERs delete their own token. ADMIN can delete all tokens for any user.
+     * @param input Contains the username of the user we want to log out and the Token.
+     * @return 200 OK logging out the user session, or appropriate error (e.g., 9901, 9906).
+     */
     @POST
     @Path("/logout")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -61,10 +66,12 @@ public class LogoutResource extends ResponseResource {
         if (datastore.get(keyTargetUser) == null)
             return errorResponse(ErrorCodes.USER_NOT_FOUND);
 
+        // USERs and BOFFICERs can only log themselves out
         if (!tokenRole.equals(Role.ADMIN.toString()) && !tokenUsername.equals(targetUsername))
             return errorResponse(ErrorCodes.UNAUTHORIZED);
 
         try {
+            // If an ADMIN is logging out someone else, sweep the database and delete all their sessions
             if (tokenRole.equals(Role.ADMIN.toString()) && !tokenUsername.equals(targetUsername)) {
 
                 Query<Entity> tokenQuery = Query.newEntityQueryBuilder().setKind("Sessions")
@@ -76,6 +83,7 @@ public class LogoutResource extends ResponseResource {
                 }
             }
             else
+                // If logging yourself out, simply delete the single token provided in the request
                 datastore.delete(token.getKey());
 
             LOG.fine("User " + input.getInput().getUsername() + " logged out");

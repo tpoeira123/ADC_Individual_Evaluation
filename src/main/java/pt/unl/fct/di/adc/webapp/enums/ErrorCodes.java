@@ -1,5 +1,9 @@
 package pt.unl.fct.di.adc.webapp.enums;
 
+/**
+ * Defines the standard error codes and descriptions required by the project specification.
+ * Used to ensure uniform error reporting across all REST endpoints.
+ */
 public enum ErrorCodes {
     INVALID_CREDENTIALS(9900, "The username-password pair is not valid"),
     USER_ALREADY_EXISTS(9901, "Error in creating an account because the username already exists"),

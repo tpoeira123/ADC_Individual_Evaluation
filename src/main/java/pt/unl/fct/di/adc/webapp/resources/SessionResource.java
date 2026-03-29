@@ -11,21 +11,24 @@ import jakarta.ws.rs.core.Response;
 import pt.unl.fct.di.adc.webapp.enums.ErrorCodes;
 import pt.unl.fct.di.adc.webapp.enums.Role;
 import pt.unl.fct.di.adc.webapp.input.InputRequest;
-import pt.unl.fct.di.adc.webapp.response.ApiResponse;
 import pt.unl.fct.di.adc.webapp.response.ResponseResource;
-import pt.unl.fct.di.adc.webapp.util.AuthToken;
 import pt.unl.fct.di.adc.webapp.util.TokenValidator;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+
+/**
+ * REST endpoint resource for viewing active sessions (Op6).
+ * Manages queries against the "Sessions" table in the Datastore.
+ */
 @Path("/")
 public class SessionResource extends ResponseResource {
 
-    private static final Logger LOG = Logger.getLogger(UserResource.class.getName());
+    // Logger instance for recording system events, errors, and debugging info for this specific class
+    private static final Logger LOG = Logger.getLogger(SessionResource.class.getName());
 
     // converts an object of java to json format or vice versa
     private final Gson g = new Gson();
@@ -35,6 +38,12 @@ public class SessionResource extends ResponseResource {
 
     public SessionResource() {}
 
+    /**
+     * Shows all currently authenticated sessions across the application (Op6).
+     * The only role that can perform this method is ADMIN.
+     * @param input Contains the Token.
+     * @return 200 OK with a list of all sessions in the database, or appropriate error code.
+     */
     @POST
     @Path("/showauthsessions")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -50,9 +59,11 @@ public class SessionResource extends ResponseResource {
             return Response.ok(g.toJson(validate.getErrorResponse())).build();
 
         try{
+            // Retrieve every active token currently stored in the Datastore
             Query<Entity> query = Query.newEntityQueryBuilder().setKind("Sessions").build();
             QueryResults<Entity> sessions = datastore.run(query);
 
+            // Iterate through the database results and map them to a List for JSON serialization
             List<Map<String, Object>> sessionsList = new ArrayList<>();
             while (sessions.hasNext()) {
                 Entity user = sessions.next();

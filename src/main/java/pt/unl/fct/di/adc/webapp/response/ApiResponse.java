@@ -1,5 +1,9 @@
 package pt.unl.fct.di.adc.webapp.response;
 
+/**
+ * Standardized response wrapper.
+ * Ensures every API response follows the required format: {"status": "...", "data": {...}}
+ */
 public class ApiResponse {
     private String status;
     private Object data;

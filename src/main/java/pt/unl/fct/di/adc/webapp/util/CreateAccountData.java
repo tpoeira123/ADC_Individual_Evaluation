@@ -2,6 +2,10 @@ package pt.unl.fct.di.adc.webapp.util;
 
 import pt.unl.fct.di.adc.webapp.enums.Role;
 
+
+/**
+ * Data Transfer Object for parsing the "input" JSON block during the Create Account operation (Op1).
+ */
 public class CreateAccountData {
 
     private String username;
@@ -49,10 +53,17 @@ public class CreateAccountData {
         return role.toUpperCase();
     }
 
+    /**
+     * Helper method to ensure a string is neither null nor completely empty.
+     */
     private boolean nonEmptyOrBlankField(String field) {
         return field != null && !field.isBlank();
     }
 
+    /**
+     * Executes business logic validation on the incoming registration data.
+     * @return true if all fields are present, passwords match, username is an email, and the role is valid.
+     */
     public boolean validRegistration() {
         return nonEmptyOrBlankField(username) && nonEmptyOrBlankField(password) &&
                 nonEmptyOrBlankField(phone) && nonEmptyOrBlankField(address) &&
