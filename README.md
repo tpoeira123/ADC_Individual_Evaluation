@@ -1,4 +1,4 @@
-To create the file .war and the package target, we need to do:
+To create the file .war and the package target, we need to always do this command (after changing the code, etc):
 
 ```bash
 mvn clean package
