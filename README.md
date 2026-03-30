@@ -4,6 +4,8 @@ To create the file .war and the package target, we need to always do this comman
 mvn clean package
 ```
 
+Then we proceed for the next instructions
+
 ## Running locally
 
 ### Pre start
