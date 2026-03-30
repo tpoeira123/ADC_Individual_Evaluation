@@ -1,0 +1,30 @@
+body{
+    font-family: sans-serif;
+    font-size: 14px;
+    margin: 25px;
+}
+
+.services{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+}
+
+.operation{
+    border: 2px solid lightslategrey;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 5px;
+    max-width: 400px;
+}
+
+input{
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 90%;
+}
+
+button{
+    padding: 10px 20px;
+    cursor: pointer;
+}

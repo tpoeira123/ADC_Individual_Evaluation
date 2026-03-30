@@ -2,30 +2,169 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 
 <head>
-  <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-  <title>ADC: Individual Evaluation Project</title>
+    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8"/>
+    <link rel="stylesheet" href="styles.css"/>
+    <script src="script.js"></script>
+    <title>ADC: Individual Evaluation Project</title>
 </head>
 
 <body>
-  <h1>Welcome to this very simple web application!</h1>
-  <p> My name is Tiago Poeira, student number 68231, and this is my individual project</p>
+    <h1>Welcome to my Individual Project!</h1>
+    <p style="font-size: 16px">Project done by: <b> Tiago Poeira - 68231 </b></p>
 
-  <table>
-    <tr>
-      <td colspan="2" style="font-weight:bold;">Available Services:</td>
-    </tr>
-    <tr>
-      <td><a href='/rest/utils/hello'>Say Hello!</a></td>
-      <td>(greetings)</td>
-    </tr>
-    <tr>
-      <td><a href='/rest/utils/time'>What time is it?</a></td>
-      <td>(see server time)</td>
-    </tr>
-  </table>
+    <h3 style="margin-top: 50px; text-align: center">Available Services</h3>
+
+    <div class="services">
+        <div class="operation">
+            <h3>Create User - Op1</h3>
+            <label>
+                <input type="text" id="create_username" placeholder="Username (ex: tp@fct)"/>
+            </label>
+            <label>
+                <input type="password" id="create_pwd" placeholder="Password"/>
+            </label>
+            <label>
+                <input type="password" id="create_confirmation" placeholder="Password (again)"/>
+            </label>
+            <label>
+                <input type="text" id="create_phone" placeholder="ex: 123456789"/>
+            </label>
+            <label>
+                <input type="text" id="create_address" placeholder="ex: Lisboa"/>
+            </label>
+            <label>
+                <p>Select a Role:
+                    <select id="create_role">
+                        <option value="USER">USER</option>
+                        <option value="BOFFICER">BOFFICER</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </p>
+            </label>
+            <label>
+            <button onclick="createUser()">Create</button>
+            <p id="createUser_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Login - Op2</h3>
+            <label>
+                <input type="text" id="login_username" placeholder="Username to login"/>
+            </label>
+            <label>
+                <input type="password" id="login_pwd" placeholder="Password"/>
+            </label>
+            <button onclick="doLogin()">Login</button>
+            <p id="login_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Show Users - Op3</h3>
+            <label>
+                <input type="text" id="showUsers_tokenId" placeholder="Token ID"/>
+            </label>
+            <button onclick="showUsers()">Show Users</button>
+            <p id="showUsers_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Delete User - Op4</h3>
+            <label>
+                <input type="text" id="delete_username" placeholder="Username to delete"/>
+            </label>
+            <label>
+                <input type="text" id="delete_tokenId" placeholder="Token ID"/>
+            </label>
+            <button onclick="deleteUser()">Delete</button>
+            <p id="delete_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Modify User Attributes - Op5</h3>
+            <label>
+                <input type="text" id="modifyUser_username" placeholder="Username to modify"/>
+            </label>
+            <label>
+                <input type="text" id="modifyUser_phone" placeholder="New phone number"/>
+            </label>
+            <label>
+                <input type="text" id="modifyUser_address" placeholder="New address"/>
+            </label>
+            <label>
+                <input type="text" id="modifyUser_tokenId" placeholder="Token ID"/>
+            </label>
+            <button onclick="modifyUser()">Modify</button>
+            <p id="modifyUser_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Show Sessions - Op6</h3>
+            <label>
+                <input type="text" id="showSessions_tokenId" placeholder="Token ID"/>
+            </label>
+            <button onclick="showSessions()">Show Sessions</button>
+            <p id="showSessions_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Check Role - Op7</h3>
+            <label>
+                <input type="text" id="checkRole_username" placeholder="Username to check role"/>
+            </label>
+            <label>
+                <input type="text" id="checkRole_tokenId" placeholder="Token ID"/>
+            </label>
+            <button onclick="checkRole()">Role</button>
+            <p id="checkRole_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Change Role - Op8</h3>
+            <label>
+                <input type="text" id="changeRole_username" placeholder="Username to change role"/>
+            </label>
+            <label>
+                <p>Select a new Role:
+                <select id="changeRole_role">
+                    <option value="USER">USER</option>
+                    <option value="BOFFICER">BOFFICER</option>
+                    <option value="ADMIN">ADMIN</option>
+                </select>
+                </p>
+            </label>
+            <label>
+                <input type="text" id="changeRole_tokenId" placeholder="Token ID"/>
+            </label>
+            <button onclick="changeRole()">Change Role</button>
+            <p id="changeRole_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Change Password - Op9</h3>
+            <label>
+                <input type="text" id="changePassword_username" placeholder="Username to change password"/>
+            </label>
+            <label>
+                <input type="password" id="changePassword_oldPassword" placeholder="Type your old Password"/>
+            </label>
+            <label>
+                <input type="password" id="changePassword_newPassword" placeholder="Type your new Password"/>
+            </label>
+            <label>
+                <input type="text" id="changePassword_tokenId" placeholder="Token ID"/>
+            </label>
+            <button onclick="changePassword()">Change Pwd</button>
+            <p id="changePassword_output"></p>
+        </div>
+        <div class="operation">
+            <h3>Logout - Op10</h3>
+            <label>
+                <input type="text" id="logout_username" placeholder="Username to logout"/>
+            </label>
+            <label>
+                <input type="text" id="logout_tokenId" placeholder="Token ID"/>
+            </label>
+            <button onclick="doLogout()">Logout</button>
+            <p id="logout_output"></p>
+        </div>
+    </div>
+
 </body>
-<footer>
-  Copyright: ADC-PEI, FCT NOVA 2026
+
+<footer style="margin-top: 50px">
+    <em>Copyright: ADC-PEI, FCT NOVA 2026</em>
 </footer>
 
 </html>
