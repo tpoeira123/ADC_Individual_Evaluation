@@ -1,3 +1,5 @@
+To create the file .war and the package target, we need to do:
+
 ```bash
 mvn clean package
 ```
