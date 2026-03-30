@@ -57,6 +57,11 @@ curl http://localhost:8080/rest/login/someother
 
 ```bash
 gcloud auth login
+```
+
+and then
+
+```bash
 gcloud config set project adc-individual-project-68231
 ```
 
