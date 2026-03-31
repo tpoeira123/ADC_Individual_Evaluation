@@ -10,10 +10,6 @@ Then we proceed for the next instructions
 
 ### Pre start
 
-```bash
-gcloud config set project adc-individual-project-68231
-```
-
 First, we need to start the emulators in one terminal:
 
 ```bash
@@ -21,6 +17,10 @@ First, we need to start the emulators in one terminal:
 ```
 
 Then, in the other terminal, we have to do this commands (in CMD):
+
+```bash
+gcloud config set project adc-individual-project-68231
+```
 
 ```bash
 set DATASTORE_USE_PROJECT_ID_AS_APP_ID=true
