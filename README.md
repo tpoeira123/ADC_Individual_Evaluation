@@ -28,7 +28,7 @@ set DATASTORE_DATASET=adc-individual-project-68231
 set DATASTORE_EMULATOR_HOST=localhost:8081
 set DATASTORE_EMULATOR_HOST_PATH=localhost:8081/datastore
 set DATASTORE_HOST=http://localhost:8081
-set DATASTORE_PROJECT_ID=projeto-cvd
+set DATASTORE_PROJECT_ID=adc-individual-project-68231
 ```
 
 ### Start the local App Engine dev server with:
