@@ -24,7 +24,7 @@ gcloud config set project adc-individual-project-68231
 
 ```bash
 set DATASTORE_USE_PROJECT_ID_AS_APP_ID=true
-set DATASTORE_DATASET=projeto-cvd
+set DATASTORE_DATASET=adc-individual-project-68231
 set DATASTORE_EMULATOR_HOST=localhost:8081
 set DATASTORE_EMULATOR_HOST_PATH=localhost:8081/datastore
 set DATASTORE_HOST=http://localhost:8081
