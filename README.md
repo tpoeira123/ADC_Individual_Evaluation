@@ -9,6 +9,11 @@ Then we proceed for the next instructions
 ## Running locally
 
 ### Pre start
+
+```bash
+gcloud config set project adc-individual-project-68231
+```
+
 First, we need to start the emulators in one terminal:
 
 ```bash
