@@ -24,12 +24,22 @@ gcloud config set project adc-individual-project-68231
 
 ```bash
 set DATASTORE_USE_PROJECT_ID_AS_APP_ID=true
+```
+Then write this:
+```bash
+gcloud beta emulators datastore env-init
+```
+Should appear some Sets in the terminal, like this:
+
+```bash
 set DATASTORE_DATASET=adc-individual-project-68231
 set DATASTORE_EMULATOR_HOST=localhost:8081
 set DATASTORE_EMULATOR_HOST_PATH=localhost:8081/datastore
 set DATASTORE_HOST=http://localhost:8081
 set DATASTORE_PROJECT_ID=adc-individual-project-68231
 ```
+copy them in the terminal and your done
+
 
 ### Start the local App Engine dev server with:
 
