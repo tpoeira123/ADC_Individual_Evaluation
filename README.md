@@ -18,6 +18,7 @@ First, we need to start the emulators in one terminal:
 Then, in the other terminal, we have to do this commands (in CMD):
 
 ```bash
+set DATASTORE_USE_PROJECT_ID_AS_APP_ID=true
 set DATASTORE_DATASET=projeto-cvd
 set DATASTORE_EMULATOR_HOST=localhost:8081
 set DATASTORE_EMULATOR_HOST_PATH=localhost:8081/datastore
