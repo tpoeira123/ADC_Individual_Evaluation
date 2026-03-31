@@ -13,7 +13,7 @@ async function apiCall(path, json, display) {
 
         if (answer.status === 'success') {
             if (answer.data.message) {
-                display.innerHTML = answer.data.message.timer(10000);
+                display.innerHTML = answer.data.message;
             } else {
                 display.innerHTML = JSON.stringify(answer.data);
             }
@@ -25,7 +25,7 @@ async function apiCall(path, json, display) {
 
         display.timeoutId = setTimeout(() => {
             display.innerHTML = "";
-        }, 3500);
+        }, 4500);
 
         return answer;
     } catch (error) {
@@ -37,7 +37,7 @@ async function apiCall(path, json, display) {
 
         display.timeoutId = setTimeout(() => {
             display.innerHTML = "";
-        }, 3500);
+        }, 4500);
     }
 }
 
