@@ -22,5 +22,4 @@ deploy dao aplicação da google:
 gcloud auth login
 
 gcloud config set project <your-proj-id>
-
 mvn appengine:deploy -Dapp.deploy.projectId=<your-proj-id> -Dapp.deploy.version=<version-number>
